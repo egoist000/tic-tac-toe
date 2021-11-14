@@ -1,0 +1,89 @@
+:root {
+    --color1: #F2ACB9;
+    --color2: #D9899E;
+    --color3: #BFB6AE;
+    --color4: #F2B4AE;
+    --color5: #F2D8D5;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--color5);
+    color: var(--color2);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Header */
+
+.header {
+    font-size: 3rem;
+    font-weight: 900;
+}
+
+/* Game section */ 
+
+.game {
+    flex: 1 0 auto;
+    box-sizing: border-box;
+}
+
+/* Board */
+
+.board-grid {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 0;
+}
+
+.board-cell {
+    height: 100px;
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cell-value {
+    font-size: 3.5rem;
+    margin: auto;
+}
+
+#cell1, #cell4, #cell7 {
+    border-right: 3px solid var(--color1);
+}
+
+#cell1, #cell2, #cell3 {
+    border-bottom: 3px solid var(--color1);
+}
+
+#cell3, #cell6, #cell9 {
+    border-left: 3px solid var(--color1);
+}
+
+#cell7, #cell8 {
+    border-top: 3px solid var(--color1);
+}
+
+#cell9 {
+    border-top: 3px solid var(--color1);
+}
+
+/* Footer */
+
+.footer a {
+    text-decoration: none;
+    margin-left: 0.5rem;
+    color: inherit
+}
+
+.footer a:hover {
+    color: var(--color1);
+}
