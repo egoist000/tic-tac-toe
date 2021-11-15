@@ -73,16 +73,17 @@ const game = (() => {
     const playTurn = (index) => {
         turnNumber++;
         gameBoard.setSign(index, currentPlayer.getSign());
-        if(turnNumber === 9) { //tie
-            gameOver = true;
-            //TODO: Display tie message
-            console.log("tie!!");
-        }
+
         if(turnNumber > 4) { //Potential tris
             if(_checkWin()) {
                 gameOver = true;
                 //TODO: Display winner name
                 console.log(`${currentPlayer.getName()} wins!!`);
+            }
+            else if(turnNumber === 9) { //tie
+                gameOver = true;
+                //TODO: Display tie message
+                console.log("tie!!");
             }
         }
         if(!gameOver) {_switchCurrentPlayer();}
