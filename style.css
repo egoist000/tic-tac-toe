@@ -75,11 +75,7 @@ body {
     animation-duration: 0.3s;
 }
 
-.cell-value.o i.fa-o {
-    visibility: visible;
-}
-
-.cell-value.x i.fa-xmark {
+.cell-value.o i.fa-o, .cell-value.x i.fa-xmark {
     visibility: visible;
 }
 
@@ -87,6 +83,8 @@ body {
     from {transform: scale(4); opacity: 0.2;};
     to {transform: scale(1); opacity: 1;}
 }
+
+/* board borders */
 
 #cell1, #cell4, #cell7 {
     border-right: 3px solid var(--color1);
