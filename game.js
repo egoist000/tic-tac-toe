@@ -111,7 +111,7 @@ const displayController = (() => {
             }
             setTimeout(() => {
                 cell.classList.remove("clean", "x", "o");
-            }, 300, cell);
+            }, 250, cell);
         }, 100, arrayLen);
     }
 
