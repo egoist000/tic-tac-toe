@@ -53,10 +53,11 @@ const displayController = (() => {
         cell.classList.add(`${sign}`);
     }
 
-    function _ppModeClicked(e) {
+    function _ppModeClicked() {
         let p1 = Player("Player 1", "x");
         let p2 = Player("Player 2", "o");
         game.start(p1, p2);
+        document.documentElement.style.setProperty("--anim-pop", "pop-anim");
         _popAnimation(optionsContainer);
     }
 
@@ -68,27 +69,50 @@ const displayController = (() => {
         gameMessage.textContent = messageString
     };
 
-    const displayWinningAnimation = (player, tie = false) => {
+    const displayResultAnimation = (player, tie = false) => {
         if(!tie) {
             const type = player.getType();
             console.log(type);
             winAnim.classList.add(`${type}`);
-            setTimeout(() => {
-                winAnim.style.transform = "scale(1)";
-            }, 200);
         }
-        restartGame.style.display = "block"
+        restartGame.classList.add("active");
     }
 
     function _popAnimation(element) {
-        element.style.transform = "scale(0.001)";
-        setTimeout(() => {
-            element.style.display = "none";
-        }, 400)
+        element.classList.remove("active");
     }
 
     function _handleGameRestart() {
-        //TODO: clean board, restart game
+        game.restart();
+        _cleanBoard();
+        _cleanWinAnimationAndReset();
+    }
+
+    function _cleanWinAnimationAndReset() {
+        winAnim.classList.remove("bot", "human");
+        restartGame.classList.remove("active");
+    }
+
+    function _cleanBoard() {
+        const cellsToClean = [...boardCells].filter(cell => cell.classList.contains("o") || cell.classList.contains("x"));
+        let arrayLen = cellsToClean.length;
+        let intId;
+        intId = setInterval(() => {
+            let rndIndex = Math.floor(Math.random() * arrayLen);
+            console.log(arrayLen);
+            let cell = cellsToClean[rndIndex]
+            cell.classList.add("clean");
+            cellsToClean.splice(rndIndex, 1)
+            arrayLen--;
+            console.log(arrayLen);
+            if(arrayLen <= 0) {
+                clearInterval(intId);
+                intId = null;
+            }
+            setTimeout(() => {
+                cell.classList.remove("clean", "x", "o");
+            }, 300, cell);
+        }, 100, arrayLen);
     }
 
     boardCells.forEach((cell) => {
@@ -100,7 +124,7 @@ const displayController = (() => {
     ppMode.addEventListener("click", _ppModeClicked);
     pbMode.addEventListener("click", _pbModeClicked);
 
-    return {displayMessage, displayWinningAnimation};
+    return {displayMessage, displayResultAnimation};
 })();
 
 const game = (() => {
@@ -130,12 +154,12 @@ const game = (() => {
             if(_checkWin()) {
                 gameOver = true;
                 displayController.displayMessage(`${currentPlayer.getName()} wins!!`);
-                displayController.displayWinningAnimation(currentPlayer);
+                displayController.displayResultAnimation(currentPlayer);
             }
             else if(turnNumber === 9) { //tie
                 gameOver = true;
                 displayController.displayMessage("Tie!!");
-                displayController.displayWinningAnimation(currentPlayer, true);
+                displayController.displayResultAnimation(currentPlayer, true);
             }
         }
         if(!gameOver) {_switchCurrentPlayer();}
@@ -181,9 +205,12 @@ const game = (() => {
 
     const restart = () => {
         gameOver = false;
+        turnNumber = 0;
+        displayController.displayMessage(`${player1.getName()} it's your turn!`);
+        gameBoard.clearStatus();
     };
 
     const getCurrentPlayer = () => {return currentPlayer};
 
-    return {start, shouldAddSign, playTurn, getCurrentPlayer};
+    return {start, restart, shouldAddSign, playTurn, getCurrentPlayer};
 })();

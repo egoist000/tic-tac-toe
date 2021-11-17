@@ -4,6 +4,8 @@
     --color3: #BFB6AE;
     --color4: #F2B4AE;
     --color5: #F2D8D5;
+    
+    --anim-pop: none;
 }
 
 body {
@@ -19,6 +21,7 @@ body {
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
+    overflow: hidden;
 }
 
 /* Header */
@@ -33,6 +36,7 @@ body {
 .game {
     flex: 1 0 auto;
     box-sizing: border-box;
+    min-height: 500px;
 }
 
 /* Board */
@@ -72,6 +76,15 @@ body {
     transform: translate(-50%,-50%);
 }
 
+.cell-value.x.clean, .cell-value.o.clean {
+    animation-name: cleanAnimation;
+    animation-duration: 0.3s;
+}
+
+.cell-value.o.clean i.fa-o, .cell-value.x.clean i.fa-xmark {
+    visibility: visible;
+}
+
 .cell-value.o, .cell-value.x {
     animation-name: selectionAnimation;
     animation-duration: 0.3s;
@@ -82,8 +95,13 @@ body {
 }
 
 @keyframes selectionAnimation {
-    from {transform: scale(4); opacity: 0;};
+    from {transform: scale(4); opacity: 0;}
     to {transform: scale(1); opacity: 1;}
+}
+
+@keyframes cleanAnimation {
+    from {transform: scale(1); opacity: 1;}
+    to {transform: scale(4); opacity: 0;}
 }
 
 /* board borders */
@@ -116,10 +134,24 @@ body {
     color: var(--color1);
 }
 
+#game-info {
+    position: relative;
+}
+
 /* Game options */
 
 #options-container {
-    transition: transform 0.3s;
+    visibility: hidden;
+    animation-name: var(--anim-pop);
+    animation-duration: 0.5s;
+    animation-fill-mode: both;
+}
+
+#options-container.active {
+    visibility: visible;
+    animation-name: push-anim;
+    animation-duration: 0.5s;
+    animation-fill-mode: both;
 }
 
 #game-mode {
@@ -141,6 +173,7 @@ body {
 }
 
 #game-mode button:hover {
+    cursor: pointer;
     background-color: var(--color4);
 }
 
@@ -148,29 +181,45 @@ body {
     font-size: 2rem;
 }
 
-.winning-anim.fa-4x {
+#win-anim-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.winning-anim {
+    visibility: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.winning-anim i {
     display: none;
-    transition: transform 0.3s;
-    transform: scale(0.001);
 }
 
-.winning-anim.fa-4x i {
+.winning-anim.bot, .winning-anim.human {
+    visibility: visible;
+    animation-name: push-anim;
+    animation-duration: 0.8s;
+}
+
+.winning-anim.human i.fa-solid.fa-user-astronaut, .winning-anim.bot i.fa-solid.fa-robot {
+    display: inline-block;
+}
+
+.restart.fa-2x {
+    margin-top: 1rem;
+}
+
+.restart.fa-2x i{
     display: none;
 }
 
-.winning-anim.fa-4x.human, .winning-anim.fa-4x.bot {
-    display: flex;
-    justify-content: center;
-}
-
-.winning-anim.fa-4x.human i.fa-solid.fa-user-astronaut.fa-beat,
-.winning-anim.fa-4x.bot i.fa-solid.fa-robot.fa-beat {
-    display: inline;
-}
-
-#restart-game {
-    display: none;
-    transition: transform 0.3s;
+.restart.fa-2x.active {
+    visibility: visible;
+    animation-name: push-anim;
+    animation-duration: 0.8s;
 }
 
 i.fa-solid.fa-sync:hover {
@@ -178,8 +227,35 @@ i.fa-solid.fa-sync:hover {
     color: var(--color1);
 }
 
-i.fa-solid.fa-sync.fa-spin {
+.restart.fa-2x.active i.fa-solid.fa-sync.fa-spin {
+    display: inline-block;
     --fa-animation-duration: 2.5s;
+}
+
+@keyframes push-anim {
+    0% {
+        transform: scale(0.001);
+    }
+    70% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        --anim-pop: pop-anim;
+    }
+}
+
+@keyframes pop-anim {
+    0% {
+        visibility: visible;
+        transform: scale(1);
+    }
+    30% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(0.001);
+    }
 }
 
 /* Footer */
