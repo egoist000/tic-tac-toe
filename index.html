@@ -11,7 +11,7 @@
     <link rel="icon" href="favicon.png" type="image/png">
     <link rel="stylesheet" href="style.css">
     <script src="game.js" defer></script>
-    <title>tic tac toe</title>
+    <title>Tic-Tac-Toe</title>
 </head>
 <body>
     <div class="container">
@@ -73,6 +73,30 @@
                     </div>
                 </div>
             </div>
+            <div class=message-container>
+                <h1 id="game-message">Select a game mode</h1>
+            </div>
+            <div id="options-container">
+                <div id="game-mode">
+                    <button id="player-player">
+                        <i class="fa-solid fa-user-astronaut"></i> 
+                        vs 
+                        <i class="fa-solid fa-user-astronaut"></i>
+                    </button>
+                    <button id="player-bot">
+                        <i class="fa-solid fa-user-astronaut"></i> 
+                        vs 
+                        <i class="fa-solid fa-robot"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="win-anim" class="winning-anim fa-4x">
+                <i class="fa-solid fa-user-astronaut fa-beat"></i> 
+                <i class="fa-solid fa-robot fa-beat"></i>
+            </div>
+        </div>
+        <div id="restart-game" class="fa-2x">
+            <i class="fa-solid fa-sync fa-spin"></i>
         </div>
         <div class="footer">
             <h2>GitHub

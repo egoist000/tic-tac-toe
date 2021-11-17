@@ -1,9 +1,10 @@
 "use strict";
 
-const Player = (name = "", sign = "") => {
+const Player = (name = "", sign = "", type = "human") => {
     const getName = () => {return name};
     const getSign = () => {return sign};
-    return {getName, getSign};
+    const getType = () => {return type};
+    return {getName, getSign, getType};
 };
 
 const gameBoard = (() => {
@@ -30,7 +31,14 @@ const gameBoard = (() => {
 })();
 
 const displayController = (() => {
-    const boardCells = document.querySelectorAll(".board-cell");
+    const boardCells = document.querySelectorAll(".cell-value");
+    const gameMessage = document.getElementById("game-message");
+    const optionsContainer = document.getElementById("options-container");
+    const ppMode = document.getElementById("player-player");
+    const pbMode = document.getElementById("player-bot");
+    const winAnim = document.getElementById("win-anim");
+    const restartGame = document.getElementById("restart-game");
+    
     function _handleCellClick(e) {
         const index = e.target.dataset.index
         if(game.shouldAddSign(index) && index !== undefined) { //if undefined the click event target is the icon and not the cell
@@ -45,10 +53,54 @@ const displayController = (() => {
         cell.classList.add(`${sign}`);
     }
 
+    function _ppModeClicked(e) {
+        let p1 = Player("Player 1", "x");
+        let p2 = Player("Player 2", "o");
+        game.start(p1, p2);
+        _popAnimation(optionsContainer);
+    }
+
+    function _pbModeClicked(e) {
+        //TODO: to implement
+    }
+
+    const displayMessage = (messageString) => {
+        gameMessage.textContent = messageString
+    };
+
+    const displayWinningAnimation = (player, tie = false) => {
+        if(!tie) {
+            const type = player.getType();
+            console.log(type);
+            winAnim.classList.add(`${type}`);
+            setTimeout(() => {
+                winAnim.style.transform = "scale(1)";
+            }, 200);
+        }
+        restartGame.style.display = "block"
+    }
+
+    function _popAnimation(element) {
+        element.style.transform = "scale(0.001)";
+        setTimeout(() => {
+            element.style.display = "none";
+        }, 400)
+    }
+
+    function _handleGameRestart() {
+        //TODO: clean board, restart game
+    }
+
     boardCells.forEach((cell) => {
         cell.addEventListener("click", _handleCellClick);
     });
 
+    restartGame.addEventListener("click", _handleGameRestart);
+
+    ppMode.addEventListener("click", _ppModeClicked);
+    pbMode.addEventListener("click", _pbModeClicked);
+
+    return {displayMessage, displayWinningAnimation};
 })();
 
 const game = (() => {
@@ -62,10 +114,10 @@ const game = (() => {
         [0, 4, 8],
         [2, 4, 6]
     ];
-    const player1 = Player("Mario", "x");
-    const player2 = Player("Luigi", "o");
-    let currentPlayer = player1;
-    let gameOver = false;
+    let player1 = undefined;
+    let player2 = undefined;
+    let currentPlayer = undefined;
+    let gameOver = true;
     let turnNumber = 0;
     const shouldAddSign = (index) => {
         return !gameBoard.getSign(index) && !gameOver;
@@ -77,13 +129,13 @@ const game = (() => {
         if(turnNumber > 4) { //Potential tris
             if(_checkWin()) {
                 gameOver = true;
-                //TODO: Display winner name
-                console.log(`${currentPlayer.getName()} wins!!`);
+                displayController.displayMessage(`${currentPlayer.getName()} wins!!`);
+                displayController.displayWinningAnimation(currentPlayer);
             }
             else if(turnNumber === 9) { //tie
                 gameOver = true;
-                //TODO: Display tie message
-                console.log("tie!!");
+                displayController.displayMessage("Tie!!");
+                displayController.displayWinningAnimation(currentPlayer, true);
             }
         }
         if(!gameOver) {_switchCurrentPlayer();}
@@ -112,8 +164,26 @@ const game = (() => {
         else {
             currentPlayer = player1;
         }
+        displayController.displayMessage(`${currentPlayer.getName()} it's your turn!`);
     }
+
+    function _setPlayers(p1, p2) {
+        player1 = p1;
+        player2 = p2;
+        currentPlayer = p1;
+    }
+
+    const start = (firstPlayer, secondPlayer) => {
+        _setPlayers(firstPlayer, secondPlayer);
+        gameOver = false; //Start the game
+        displayController.displayMessage(`${firstPlayer.getName()} it's your turn!`);
+    };
+
+    const restart = () => {
+        gameOver = false;
+    };
+
     const getCurrentPlayer = () => {return currentPlayer};
 
-    return {shouldAddSign, playTurn, getCurrentPlayer};
+    return {start, shouldAddSign, playTurn, getCurrentPlayer};
 })();

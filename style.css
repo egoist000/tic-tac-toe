@@ -39,14 +39,16 @@ body {
 
 .board-grid {
     display: grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: repeat(3, 1fr);
+    width: 306px;
+    margin: 0 auto;
     gap: 0;
 }
 
 .board-cell {
     cursor: pointer;
-    height: 100px;
     width: 100px;
+    height: 100px;
 }
 
 .board-cell:hover {
@@ -80,7 +82,7 @@ body {
 }
 
 @keyframes selectionAnimation {
-    from {transform: scale(4); opacity: 0.2;};
+    from {transform: scale(4); opacity: 0;};
     to {transform: scale(1); opacity: 1;}
 }
 
@@ -104,6 +106,80 @@ body {
 
 #cell9 {
     border-top: 3px solid var(--color1);
+}
+
+/* Game message */
+
+#game-message {
+    text-align: center;
+    margin: 3rem 0 2rem 0;
+    color: var(--color1);
+}
+
+/* Game options */
+
+#options-container {
+    transition: transform 0.3s;
+}
+
+#game-mode {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+#game-mode button {
+    font-size: 1.3rem;
+    width: 9rem;
+    font-family: inherit;
+    color: var(--color2);
+    background-color: var(--color1);
+    padding: 0.5rem 0;
+    border-radius: 1.5rem;
+    border: none;
+    box-shadow: 0 0 20px 2px var(--color3);
+}
+
+#game-mode button:hover {
+    background-color: var(--color4);
+}
+
+#game-mode button i {
+    font-size: 2rem;
+}
+
+.winning-anim.fa-4x {
+    display: none;
+    transition: transform 0.3s;
+    transform: scale(0.001);
+}
+
+.winning-anim.fa-4x i {
+    display: none;
+}
+
+.winning-anim.fa-4x.human, .winning-anim.fa-4x.bot {
+    display: flex;
+    justify-content: center;
+}
+
+.winning-anim.fa-4x.human i.fa-solid.fa-user-astronaut.fa-beat,
+.winning-anim.fa-4x.bot i.fa-solid.fa-robot.fa-beat {
+    display: inline;
+}
+
+#restart-game {
+    display: none;
+    transition: transform 0.3s;
+}
+
+i.fa-solid.fa-sync:hover {
+    cursor: pointer;
+    color: var(--color1);
+}
+
+i.fa-solid.fa-sync.fa-spin {
+    --fa-animation-duration: 2.5s;
 }
 
 /* Footer */
