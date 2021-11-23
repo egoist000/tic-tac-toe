@@ -3,7 +3,7 @@
 const Player = (name = "", sign = "", type = "human") => {
     const getName = () => {return name};
     const getSign = () => {return sign};
-    const getType = () => {return type};
+    const getType = () => {return type}; //human or bot
     return {getName, getSign, getType};
 };
 
@@ -38,6 +38,13 @@ const displayController = (() => {
     const pbMode = document.getElementById("player-bot");
     const winAnim = document.getElementById("win-anim");
     const restartGame = document.getElementById("restart-game");
+    /* Difficulty modal */
+    const pbModalContainer = document.getElementById("pb-modal");
+    const modalContent = pbModalContainer.querySelector(".modal-content");
+    const difficultySlider = document.getElementById("difficulty-slider");
+    const difficultyLbl = document.getElementById("difficulty-lbl");
+    const xBtn = document.getElementById("x-btn");
+    const oBtn = document.getElementById("o-btn");
     
     function _handleCellClick(e) {
         const index = e.target.dataset.index
@@ -60,9 +67,34 @@ const displayController = (() => {
         document.documentElement.style.setProperty("--anim-pop", "pop-anim");
         _popAnimation(optionsContainer);
     }
+    
+    function _pbModeClicked() {
+        document.documentElement.style.setProperty("--anim-pop", "pop-anim");
+        _pushModal(pbModalContainer);
+    }
 
-    function _pbModeClicked(e) {
-        //TODO: to implement
+    function _handleDifficultyInput(e) {
+        document.documentElement.style.setProperty("--anim-pop", "pop-anim");
+        let botSign = e.currentTarget.dataset.val;
+        let botPlayer = Player("Bot", botSign, "bot");
+        botSign === "x" ? game.start(botPlayer, Player("Human", "o", "human")) : 
+            game.start(Player("Human", "x", "human"), botPlayer);
+        _popModal(pbModalContainer);
+        _popAnimation(optionsContainer);
+    }
+
+    function _pushModal(modal) {
+        modal.style.display = "flex";
+        setTimeout(() => {
+            modalContent.style.transform = "scale(1)";
+        }, 200);
+    }
+
+    function _popModal(modal) {
+        modalContent.style.transform = "scale(0.001)";
+        setTimeout(() => {
+            modal.style.display = "none";
+        }, 400);
     }
 
     const displayMessage = (messageString) => {
@@ -115,12 +147,43 @@ const displayController = (() => {
         }, 100, arrayLen);
     }
 
+    function _isClickOutsideModal(e) {
+        if(e.target == pbModalContainer) {
+            _popModal(pbModalContainer);
+        }
+    }
+
+    function _changeDifficulty(e) {
+        const value = e.target.value;
+        switch(value) {
+            case("0"):
+                console.log("easy");
+                difficultyLbl.textContent = "Easy";
+                break;
+            case("2"):
+                console.log("hard");
+                difficultyLbl.textContent = "Hard";
+                break;
+            default:
+                console.log("normal");
+                difficultyLbl.textContent = "Normal";
+                break;
+        }
+    }
+
+    /* Event listeners */
+
     boardCells.forEach((cell) => {
         cell.addEventListener("click", _handleCellClick);
     });
 
     restartGame.addEventListener("click", _handleGameRestart);
 
+    difficultySlider.addEventListener("input", _changeDifficulty);
+    xBtn.addEventListener("click", _handleDifficultyInput);
+    oBtn.addEventListener("click", _handleDifficultyInput);
+
+    window.addEventListener("click", _isClickOutsideModal);
     ppMode.addEventListener("click", _ppModeClicked);
     pbMode.addEventListener("click", _pbModeClicked);
 
@@ -198,6 +261,7 @@ const game = (() => {
     }
 
     const start = (firstPlayer, secondPlayer) => {
+        //TODO: handle bot player
         _setPlayers(firstPlayer, secondPlayer);
         gameOver = false; //Start the game
         displayController.displayMessage(`${firstPlayer.getName()} it's your turn!`);

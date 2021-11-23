@@ -20,96 +20,114 @@
     <div class="container">
         <h1 class="header">Tic-Tac-Toe</h1>
         <div class="game">
-            <div class="board-grid">
-                <div class="board-cell" id="cell1">
-                    <div class="cell-value" data-index="0">
-                        <i class="fa-solid fa-o"></i>
-                        <i class="fa-solid fa-xmark"></i>
+            <div>
+                <div class="board-grid">
+                    <div class="board-cell" id="cell1">
+                        <div class="cell-value" data-index="0">
+                            <i class="fa-solid fa-o"></i>
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                    </div>
+                    <div class="board-cell" id="cell2">
+                        <div class="cell-value" data-index="1">
+                            <i class="fa-solid fa-o"></i>
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                    </div>
+                    <div class="board-cell" id="cell3">
+                        <div class="cell-value" data-index="2">
+                            <i class="fa-solid fa-o"></i>
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                    </div>
+                    <div class="board-cell" id="cell4">
+                        <div class="cell-value" data-index="3">
+                            <i class="fa-solid fa-o"></i>
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                    </div>
+                    <div class="board-cell" id="cell5">
+                        <div class="cell-value" data-index="4">
+                            <i class="fa-solid fa-o"></i>
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                    </div>
+                    <div class="board-cell" id="cell6">
+                        <div class="cell-value" data-index="5">
+                            <i class="fa-solid fa-o"></i>
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                    </div>
+                    <div class="board-cell" id="cell7">
+                        <div class="cell-value" data-index="6">
+                            <i class="fa-solid fa-o"></i>
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                    </div>
+                    <div class="board-cell" id="cell8">
+                        <div class="cell-value" data-index="7">
+                            <i class="fa-solid fa-o"></i>
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
+                    </div>
+                    <div class="board-cell" id="cell9">
+                        <div class="cell-value" data-index="8">
+                            <i class="fa-solid fa-o"></i>
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
                     </div>
                 </div>
-                <div class="board-cell" id="cell2">
-                    <div class="cell-value" data-index="1">
-                        <i class="fa-solid fa-o"></i>
-                        <i class="fa-solid fa-xmark"></i>
-                    </div>
+                <div class=message-container>
+                    <h1 id="game-message">Select a game mode</h1>
                 </div>
-                <div class="board-cell" id="cell3">
-                    <div class="cell-value" data-index="2">
-                        <i class="fa-solid fa-o"></i>
-                        <i class="fa-solid fa-xmark"></i>
+                <div id="game-info">
+                    <div id="win-anim-container">
+                        <div id="win-anim" class="winning-anim fa-4x">
+                            <i class="fa-solid fa-user-astronaut fa-beat"></i> 
+                            <i class="fa-solid fa-robot fa-beat"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="board-cell" id="cell4">
-                    <div class="cell-value" data-index="3">
-                        <i class="fa-solid fa-o"></i>
-                        <i class="fa-solid fa-xmark"></i>
-                    </div>
-                </div>
-                <div class="board-cell" id="cell5">
-                    <div class="cell-value" data-index="4">
-                        <i class="fa-solid fa-o"></i>
-                        <i class="fa-solid fa-xmark"></i>
-                    </div>
-                </div>
-                <div class="board-cell" id="cell6">
-                    <div class="cell-value" data-index="5">
-                        <i class="fa-solid fa-o"></i>
-                        <i class="fa-solid fa-xmark"></i>
-                    </div>
-                </div>
-                <div class="board-cell" id="cell7">
-                    <div class="cell-value" data-index="6">
-                        <i class="fa-solid fa-o"></i>
-                        <i class="fa-solid fa-xmark"></i>
-                    </div>
-                </div>
-                <div class="board-cell" id="cell8">
-                    <div class="cell-value" data-index="7">
-                        <i class="fa-solid fa-o"></i>
-                        <i class="fa-solid fa-xmark"></i>
-                    </div>
-                </div>
-                <div class="board-cell" id="cell9">
-                    <div class="cell-value" data-index="8">
-                        <i class="fa-solid fa-o"></i>
-                        <i class="fa-solid fa-xmark"></i>
+                    <div id="options-container" class="active">
+                        <div id="game-mode" class="btns">
+                            <button id="player-player">
+                                <i class="fa-solid fa-user-astronaut"></i> 
+                                vs 
+                                <i class="fa-solid fa-user-astronaut"></i>
+                            </button>
+                            <button id="player-bot">
+                                <i class="fa-solid fa-user-astronaut"></i> 
+                                vs 
+                                <i class="fa-solid fa-robot"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class=message-container>
-                <h1 id="game-message">Select a game mode</h1>
+            <div id="restart-game" class="restart fa-2x">
+                <i class="fa-solid fa-sync fa-spin"></i>
             </div>
-            <div id="game-info">
-                <div id="win-anim-container">
-                    <div id="win-anim" class="winning-anim fa-4x">
-                        <i class="fa-solid fa-user-astronaut fa-beat"></i> 
-                        <i class="fa-solid fa-robot fa-beat"></i>
-                    </div>
-                </div>
-                <div id="options-container" class="active">
-                    <div id="game-mode">
-                        <button id="player-player">
-                            <i class="fa-solid fa-user-astronaut"></i> 
-                            vs 
-                            <i class="fa-solid fa-user-astronaut"></i>
-                        </button>
-                        <button id="player-bot">
-                            <i class="fa-solid fa-user-astronaut"></i> 
-                            vs 
-                            <i class="fa-solid fa-robot"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="restart-game" class="restart fa-2x">
-            <i class="fa-solid fa-sync fa-spin"></i>
         </div>
         <div class="footer">
             <h2>GitHub
                 <i class="fab fa-github-alt"></i>
                 <a href="https://github.com/egoist000">egoist000</a>
             </h2>
+        </div>
+    </div>
+    <div id="pb-modal" class="modal">
+        <div class="modal-content">
+            <div id="difficulty-bot-anim" class="fa-3x">
+                <i id="bot-animation" class="fa-solid fa-robot fa-beat"></i>
+            </div>
+            <h2>Choose a difficulty</h2>
+            <div class="difficulty-input">
+                <label id="difficulty-lbl">Normal</label>
+                <input id="difficulty-slider" class="slider" type="range" max="2" value="1">
+                <div class="btns">
+                    <button id="x-btn" class="fa-2x" data-val="x"><i class="fa-solid fa-xmark"></i></button>
+                    <button id="o-btn" class="fa-2x" data-val="o"><i class="fa-solid fa-o"></i></button>
+                </div>
+            </div>
         </div>
     </div>
 </body>
