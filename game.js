@@ -7,6 +7,36 @@ const Player = (name = "", sign = "", type = "human") => {
     return {getName, getSign, getType};
 };
 
+const BotPlayer = (sign, aiLevel = 0) => {
+    const player = Player("Bot", sign, "bot");
+    const getAiLevel = () => {return aiLevel};
+    
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function _easyAi() {
+        const cellsInd = gameBoard.getFreeCellsInd();
+        console.log(cellsInd);
+        const rndIndex = cellsInd[Math.floor(Math.random() * cellsInd.length)];
+        displayController.displayBotPlayerSign(rndIndex, sign);
+        return rndIndex;
+    }
+
+    const play = async() => {
+        await sleep(1200); //Simulate bot thinking
+        switch (aiLevel) {
+            case 0:
+                game.playTurn(_easyAi());
+                break;
+            default:
+                break;
+        }
+    };
+
+    return {...player, getAiLevel, play};
+};
+
 const gameBoard = (() => {
     const _boardStatus = [
         "", "", "",
@@ -27,7 +57,16 @@ const gameBoard = (() => {
             _boardStatus[i] = "";
         }
     };
-    return {setSign, getSign, clearStatus};
+
+    const getFreeCellsInd = () => {
+        let freeCellsInd = [];
+        for(let i = 0; i < 9; i++) {
+            if(_boardStatus[i] === "") {freeCellsInd.push(i)};
+        }
+        return freeCellsInd;
+    };
+
+    return {setSign, getSign, clearStatus, getFreeCellsInd};
 })();
 
 const displayController = (() => {
@@ -45,19 +84,22 @@ const displayController = (() => {
     const difficultyLbl = document.getElementById("difficulty-lbl");
     const xBtn = document.getElementById("x-btn");
     const oBtn = document.getElementById("o-btn");
-    
+
     function _handleCellClick(e) {
         const index = e.target.dataset.index
         if(game.shouldAddSign(index) && index !== undefined) { //if undefined the click event target is the icon and not the cell
-            console.log(index);
             _displayPlayerSign(e.target, game.getCurrentPlayer().getSign());
             game.playTurn(index);
         }
-        else {return}
     }
     
     function _displayPlayerSign(cell, sign) {
         cell.classList.add(`${sign}`);
+    }
+
+    function displayBotPlayerSign(cellIndex, sign) {
+        const cell = document.getElementById(`cell${cellIndex}`);
+        cell.querySelector(".cell-value").classList.add(`${sign}`);
     }
 
     function _ppModeClicked() {
@@ -76,11 +118,13 @@ const displayController = (() => {
     function _handleDifficultyInput(e) {
         document.documentElement.style.setProperty("--anim-pop", "pop-anim");
         let botSign = e.currentTarget.dataset.val;
-        let botPlayer = Player("Bot", botSign, "bot");
-        botSign === "x" ? game.start(botPlayer, Player("Human", "o", "human")) : 
+        let botPlayer = BotPlayer(botSign, +difficultySlider.value);
+        botSign === "x" ? game.start(botPlayer, Player("Human", "o", "human")) :
             game.start(Player("Human", "x", "human"), botPlayer);
+        
         _popModal(pbModalContainer);
         _popAnimation(optionsContainer);
+        difficultySlider.value = "1"; //reset to normal
     }
 
     function _pushModal(modal) {
@@ -187,7 +231,7 @@ const displayController = (() => {
     ppMode.addEventListener("click", _ppModeClicked);
     pbMode.addEventListener("click", _pbModeClicked);
 
-    return {displayMessage, displayResultAnimation};
+    return {displayMessage, displayResultAnimation, displayBotPlayerSign};
 })();
 
 const game = (() => {
@@ -207,7 +251,7 @@ const game = (() => {
     let gameOver = true;
     let turnNumber = 0;
     const shouldAddSign = (index) => {
-        return !gameBoard.getSign(index) && !gameOver;
+        return !gameBoard.getSign(index) && !gameOver && currentPlayer.getType() !== "bot";
     }
     const playTurn = (index) => {
         turnNumber++;
@@ -252,6 +296,9 @@ const game = (() => {
             currentPlayer = player1;
         }
         displayController.displayMessage(`${currentPlayer.getName()} it's your turn!`);
+        if(currentPlayer.getType() === "bot") {
+            currentPlayer.play();
+        }
     }
 
     function _setPlayers(p1, p2) {
@@ -260,17 +307,19 @@ const game = (() => {
         currentPlayer = p1;
     }
 
-    const start = (firstPlayer, secondPlayer) => {
+    const start = (firstPlayer, secondPlayer, aiLevel = undefined) => {
         //TODO: handle bot player
         _setPlayers(firstPlayer, secondPlayer);
         gameOver = false; //Start the game
-        displayController.displayMessage(`${firstPlayer.getName()} it's your turn!`);
+        displayController.displayMessage(`${currentPlayer.getName()} it's your turn!`);
+        if(currentPlayer.getType() === "bot") {
+            currentPlayer.play();
+        }
     };
 
     const restart = () => {
-        gameOver = false;
         turnNumber = 0;
-        displayController.displayMessage(`${player1.getName()} it's your turn!`);
+        start(player1, player2); //Start with the same players
         gameBoard.clearStatus();
     };
 

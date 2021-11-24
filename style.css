@@ -111,23 +111,23 @@ body {
 
 /* board borders */
 
-#cell1, #cell4, #cell7 {
+#cell0, #cell3, #cell6 {
     border-right: 3px solid var(--color1);
 }
 
-#cell1, #cell2, #cell3 {
+#cell0, #cell1, #cell2 {
     border-bottom: 3px solid var(--color1);
 }
 
-#cell3, #cell6, #cell9 {
+#cell2, #cell5, #cell8 {
     border-left: 3px solid var(--color1);
 }
 
-#cell7, #cell8 {
+#cell6, #cell7 {
     border-top: 3px solid var(--color1);
 }
 
-#cell9 {
+#cell8 {
     border-top: 3px solid var(--color1);
 }
 
