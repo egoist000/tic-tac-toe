@@ -11,6 +11,7 @@ const BotPlayer = (sign, aiLevel = 0) => {
     const player = Player("Bot", sign, "bot");
     const getAiLevel = () => {return aiLevel};
     
+    /* Sleep function @play */
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -23,13 +24,27 @@ const BotPlayer = (sign, aiLevel = 0) => {
         return rndIndex;
     }
 
+    function _normalAi() {
+        //TODO: to implement
+        throw Error;
+    }
+
+    function _hardAi() {
+        //TODO: to implement
+        throw Error;
+    }
+
     const play = async() => {
-        await sleep(1200); //Simulate bot thinking
+        await sleep(800); //Simulate bot thinking
         switch (aiLevel) {
             case 0:
                 game.playTurn(_easyAi());
                 break;
+            case 2:
+                game.playTurn(_hardAi());
+                break;
             default:
+                game.playTurn(_normalAi());
                 break;
         }
     };
@@ -145,13 +160,26 @@ const displayController = (() => {
         gameMessage.textContent = messageString
     };
 
-    const displayResultAnimation = (player, tie = false) => {
-        if(!tie) {
+    const displayResultAnimation = (shouldPlayPlayerAnim, player = undefined) => {
+        if(shouldPlayPlayerAnim && player !== undefined) {
             const type = player.getType();
             console.log(type);
             winAnim.classList.add(`${type}`);
+            _highlightWinComb(game.getWinningCombination());
         }
         restartGame.classList.add("active");
+    }
+
+    function _highlightWinComb(comb) {
+        comb.forEach(cellInd => {
+            document.getElementById(`cell${cellInd}`).classList.add("win");
+        });
+    } 
+
+    function _removeCombHighlighting(comb) {
+        comb.forEach(cellInd => {
+            document.getElementById(`cell${cellInd}`).classList.remove("win");
+        });
     }
 
     function _popAnimation(element) {
@@ -159,7 +187,7 @@ const displayController = (() => {
     }
 
     function _handleGameRestart() {
-        game.restart();
+        _removeCombHighlighting(game.getWinningCombination());
         _cleanBoard();
         _cleanWinAnimationAndReset();
     }
@@ -184,6 +212,7 @@ const displayController = (() => {
             if(arrayLen <= 0) {
                 clearInterval(intId);
                 intId = null;
+                game.restart() // Restart game at the end of the cleaning
             }
             setTimeout(() => {
                 cell.classList.remove("clean", "x", "o");
@@ -248,6 +277,7 @@ const game = (() => {
     let player1 = undefined;
     let player2 = undefined;
     let currentPlayer = undefined;
+    let winningCombination = [];
     let gameOver = true;
     let turnNumber = 0;
     const shouldAddSign = (index) => {
@@ -258,20 +288,22 @@ const game = (() => {
         gameBoard.setSign(index, currentPlayer.getSign());
 
         if(turnNumber > 4) { //Potential tris
-            if(_checkWin()) {
+            winningCombination = _searchWinningCombination();
+            if(winningCombination.length !== 0) { // Winning comb
                 gameOver = true;
                 displayController.displayMessage(`${currentPlayer.getName()} wins!!`);
-                displayController.displayResultAnimation(currentPlayer);
+                displayController.displayResultAnimation(winningCombination, currentPlayer);
             }
             else if(turnNumber === 9) { //tie
                 gameOver = true;
                 displayController.displayMessage("Tie!!");
-                displayController.displayResultAnimation(currentPlayer, true);
+                displayController.displayResultAnimation(false);
             }
         }
         if(!gameOver) {_switchCurrentPlayer();}
     };
-    function _checkWin() {
+
+    function _searchWinningCombination() {
         const sign = currentPlayer.getSign();
         for(let i = 0; i < _WINNING_COMBINATIONS.length; i++) {
             let combination = _WINNING_COMBINATIONS[i];
@@ -283,11 +315,14 @@ const game = (() => {
                 }
             }
             if(win) {
-                return true;
+                console.log(combination);
+                return combination; // Win combination found
             }
+
         }
-        return false;
+        return []; // search failed
     }
+
     function _switchCurrentPlayer() {
         if(currentPlayer === player1) {
             currentPlayer = player2;
@@ -307,7 +342,7 @@ const game = (() => {
         currentPlayer = p1;
     }
 
-    const start = (firstPlayer, secondPlayer, aiLevel = undefined) => {
+    const start = (firstPlayer, secondPlayer) => {
         //TODO: handle bot player
         _setPlayers(firstPlayer, secondPlayer);
         gameOver = false; //Start the game
@@ -319,11 +354,13 @@ const game = (() => {
 
     const restart = () => {
         turnNumber = 0;
-        start(player1, player2); //Start with the same players
+        winningCombination = [];
         gameBoard.clearStatus();
+        start(player1, player2); //Start with the same players
     };
 
     const getCurrentPlayer = () => {return currentPlayer};
+    const getWinningCombination = () => {return winningCombination}
 
-    return {start, restart, shouldAddSign, playTurn, getCurrentPlayer};
+    return {start, restart, shouldAddSign, playTurn, getCurrentPlayer, getWinningCombination};
 })();

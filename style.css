@@ -40,7 +40,6 @@ body {
     justify-content: space-between;
     gap: 1.5rem;
     flex: 1 0 auto;
-    box-sizing: border-box;
     min-height: 540px;
 }
 
@@ -49,7 +48,7 @@ body {
 .board-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    width: 306px;
+    width: 300px;
     margin: 0 auto;
     gap: 0;
 }
@@ -58,6 +57,12 @@ body {
     cursor: pointer;
     width: 100px;
     height: 100px;
+    box-sizing: border-box;
+}
+
+.board-cell.win {
+    transition: background-color 0.8s;
+    background-color: var(--color4);
 }
 
 .board-cell:hover {
