@@ -7,13 +7,45 @@ const Player = (name = "", sign = "", type = "human") => {
     return {getName, getSign, getType};
 };
 
-const BotPlayer = (sign, aiLevel = 0) => {
+const BotPlayer = (sign, opponentSign, aiLevel = 0) => {
     const player = Player("Bot", sign, "bot");
     const getAiLevel = () => {return aiLevel};
-    
+
     /* Sleep function @play */
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function _minimax(board, depth, currSign, isMaximizing = true) {
+        let result = game.checkWinnerForType(board, currSign);
+        if(result !== "") {
+            return result === "bot" ? 100 - depth : -100 + depth;
+        }
+        else if(board.getFreeCellsInd().length === 0) {return 0}
+        if(isMaximizing) {
+            let bestScore = -Infinity;
+            for(let i = 0; i < 9; i++) {
+                if(board.getSign(i) === "") {
+                    board.setSign(i, sign);
+                    let score = _minimax(board, depth + 1, opponentSign,false);
+                    board.setSign(i, "");
+                    bestScore = Math.max(score, bestScore);
+                }
+            }
+            return bestScore;
+        }
+        else {
+            let bestScore = Infinity;
+            for(let i = 0; i < 9; i++) {
+                if(board.getSign(i) === "") {
+                    board.setSign(i, opponentSign);
+                    let score = _minimax(board, depth + 1, sign, true);
+                    board.setSign(i, "");
+                    bestScore = Math.min(score, bestScore);
+                }
+            }
+            return bestScore;
+        }
     }
 
     function _easyAi() {
@@ -30,8 +62,21 @@ const BotPlayer = (sign, aiLevel = 0) => {
     }
 
     function _hardAi() {
-        //TODO: to implement
-        throw Error;
+        let bestScore = -Infinity;
+        let bestMove = undefined;
+        for(let i = 0; i < 9; i++) {
+            if(gameBoard.getSign(i) === "") {
+                gameBoard.setSign(i, sign);
+                let score = _minimax(gameBoard, 0, sign, false);
+                gameBoard.setSign(i, "");
+                if(score > bestScore) {
+                    bestScore = score;
+                    bestMove = i;
+                }
+            }
+        }
+        displayController.displayBotPlayerSign(bestMove, sign);
+        return bestMove;
     }
 
     const play = async() => {
@@ -53,30 +98,30 @@ const BotPlayer = (sign, aiLevel = 0) => {
 };
 
 const gameBoard = (() => {
-    const _boardStatus = [
+    const boardStatus = [
         "", "", "",
         "", "", "",
         "", "", ""
     ];
 
     const setSign = (index, sign) => {
-        _boardStatus[index] = sign;
+        boardStatus[index] = sign;
     };
 
     const getSign = (index) => {
-        return _boardStatus[index];
+        return boardStatus[index];
     };
 
     const clearStatus = () => {
-        for(let i = 0; i < _boardStatus.length; i++) {
-            _boardStatus[i] = "";
+        for(let i = 0; i < boardStatus.length; i++) {
+            boardStatus[i] = "";
         }
     };
 
     const getFreeCellsInd = () => {
         let freeCellsInd = [];
         for(let i = 0; i < 9; i++) {
-            if(_boardStatus[i] === "") {freeCellsInd.push(i)};
+            if(boardStatus[i] === "") {freeCellsInd.push(i)};
         }
         return freeCellsInd;
     };
@@ -133,13 +178,14 @@ const displayController = (() => {
     function _handleDifficultyInput(e) {
         document.documentElement.style.setProperty("--anim-pop", "pop-anim");
         let botSign = e.currentTarget.dataset.val;
-        let botPlayer = BotPlayer(botSign, +difficultySlider.value);
-        botSign === "x" ? game.start(botPlayer, Player("Human", "o", "human")) :
-            game.start(Player("Human", "x", "human"), botPlayer);
+        botSign === "x" ? game.start(BotPlayer(botSign, "o", +difficultySlider.value), Player("Human", "o", "human")) :
+            game.start(Player("Human", "x", "human"), BotPlayer(botSign, "x", +difficultySlider.value));
         
         _popModal(pbModalContainer);
         _popAnimation(optionsContainer);
-        difficultySlider.value = "1"; //reset to normal
+        setTimeout(() => {
+            difficultySlider.value = "1"; //reset to normal
+        }, 200)
     }
 
     function _pushModal(modal) {
@@ -283,12 +329,24 @@ const game = (() => {
     const shouldAddSign = (index) => {
         return !gameBoard.getSign(index) && !gameOver && currentPlayer.getType() !== "bot";
     }
+
+    /* Utility function to calculate the score used in @_minimax() */
+    const checkWinnerForType = (board, sign) => {
+        const res = _searchWinningCombination(board, sign)
+        if (res.length === 0) { //Search failed
+            return "";
+        }
+        else { //There is a winner
+            return board.getSign(res[0]) === player1.getSign() ? player1.getType() : player2.getType();
+        }
+    }
+
     const playTurn = (index) => {
         turnNumber++;
         gameBoard.setSign(index, currentPlayer.getSign());
 
         if(turnNumber > 4) { //Potential tris
-            winningCombination = _searchWinningCombination();
+            winningCombination = _searchWinningCombination(gameBoard, currentPlayer.getSign());
             if(winningCombination.length !== 0) { // Winning comb
                 gameOver = true;
                 displayController.displayMessage(`${currentPlayer.getName()} wins!!`);
@@ -303,19 +361,17 @@ const game = (() => {
         if(!gameOver) {_switchCurrentPlayer();}
     };
 
-    function _searchWinningCombination() {
-        const sign = currentPlayer.getSign();
+    function _searchWinningCombination(board, sign) {
         for(let i = 0; i < _WINNING_COMBINATIONS.length; i++) {
             let combination = _WINNING_COMBINATIONS[i];
             let win = true;
             for(let j = 0; j < 3; j++) {
-                if(gameBoard.getSign(combination[j]) !== sign) {
+                if(board.getSign(combination[j]) !== sign) {
                     win = false;
                     break;
                 }
             }
             if(win) {
-                console.log(combination);
                 return combination; // Win combination found
             }
 
@@ -343,7 +399,6 @@ const game = (() => {
     }
 
     const start = (firstPlayer, secondPlayer) => {
-        //TODO: handle bot player
         _setPlayers(firstPlayer, secondPlayer);
         gameOver = false; //Start the game
         displayController.displayMessage(`${currentPlayer.getName()} it's your turn!`);
@@ -362,5 +417,6 @@ const game = (() => {
     const getCurrentPlayer = () => {return currentPlayer};
     const getWinningCombination = () => {return winningCombination}
 
-    return {start, restart, shouldAddSign, playTurn, getCurrentPlayer, getWinningCombination};
+    return {start, restart, shouldAddSign, playTurn, getCurrentPlayer, 
+        getWinningCombination, checkWinnerForType};
 })();
