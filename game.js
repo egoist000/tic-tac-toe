@@ -110,6 +110,12 @@ const BotPlayer = (sign, opponentSign, aiLevel = 0) => {
     }
 
     function _hardAi() {
+        let move = _getMoveWithPrecision(90);
+        displayController.displayBotPlayerSign(move, sign);
+        return move;
+    }
+
+    function _impossibleAi() {
         let bestMove = _getBestMove();
         displayController.displayBotPlayerSign(bestMove, sign);
         return bestMove;
@@ -123,6 +129,9 @@ const BotPlayer = (sign, opponentSign, aiLevel = 0) => {
                 break;
             case 2:
                 game.playTurn(_hardAi());
+                break;
+            case 3:
+                game.playTurn(_impossibleAi());
                 break;
             default:
                 game.playTurn(_normalAi());
@@ -318,6 +327,10 @@ const displayController = (() => {
             case("2"):
                 console.log("hard");
                 difficultyLbl.textContent = "Hard";
+                break;
+            case("3"):
+                console.log("impossible");
+                difficultyLbl.textContent = "Impossible 😈";
                 break;
             default:
                 console.log("normal");
