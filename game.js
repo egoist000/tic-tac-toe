@@ -9,6 +9,7 @@ const Player = (name = "", sign = "", type = "human") => {
 
 const BotPlayer = (sign, opponentSign, aiLevel = 0) => {
     const player = Player("Bot", sign, "bot");
+    const nodesMap = new Map();
     const getAiLevel = () => {return aiLevel};
 
     /* Sleep function @play */
@@ -16,65 +17,100 @@ const BotPlayer = (sign, opponentSign, aiLevel = 0) => {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    function _minimax(board, depth, currSign, isMaximizing = true) {
-        let result = game.checkWinnerForType(board, currSign);
+    function _minimax(board, maxP, minP, depth = 0, isMaximizing = true) {
+        
+        if(depth === 0) {nodesMap.clear();} //Clear map if new move
+
+        /* Check for teminal state (win or tie) */
+        let result = game.checkWinner(board);
         if(result !== "") {
-            return result === "bot" ? 100 - depth : -100 + depth;
+            return result === maxP ? 100 - depth : -100 + depth;
         }
-        else if(board.getFreeCellsInd().length === 0) {return 0}
+        else if(board.getFreeCellsInd().length === 0) {return 0;}
+
         if(isMaximizing) {
             let bestScore = -Infinity;
-            for(let i = 0; i < 9; i++) {
-                if(board.getSign(i) === "") {
-                    board.setSign(i, sign);
-                    let score = _minimax(board, depth + 1, opponentSign,false);
-                    board.setSign(i, "");
-                    bestScore = Math.max(score, bestScore);
+            gameBoard.getFreeCellsInd().forEach(i => {
+                board.setSign(i, maxP);
+                let score = _minimax(board, maxP, minP, depth + 1, false);
+                board.setSign(i, "");
+                bestScore = Math.max(score, bestScore);
+
+                if(depth === 0) { //Main call
+                    const moves = nodesMap.has(score)
+                    ? `${nodesMap.get(score)},${i}` : i;
+                    nodesMap.set(score, moves);
                 }
+            });
+            if(depth === 0) { //Main call
+                if(typeof nodesMap.get(bestScore) === "string") {
+                    const arr = nodesMap.get(bestScore).split(",");
+                    const rnd = Math.floor(Math.random() * arr.length);
+                    console.table(nodesMap);
+                    return arr[rnd];
+                }
+                else {console.table(nodesMap);return nodesMap.get(bestScore);}
             }
-            return bestScore;
+            return bestScore; //Recursive call
         }
         else {
             let bestScore = Infinity;
-            for(let i = 0; i < 9; i++) {
-                if(board.getSign(i) === "") {
-                    board.setSign(i, opponentSign);
-                    let score = _minimax(board, depth + 1, sign, true);
-                    board.setSign(i, "");
-                    bestScore = Math.min(score, bestScore);
+            gameBoard.getFreeCellsInd().forEach(i => {
+                board.setSign(i, minP);
+                let score = _minimax(board, maxP, minP, depth + 1, true);
+                board.setSign(i, "");
+                bestScore = Math.min(score, bestScore);
+
+                if(depth === 0) { //Main call
+                    const moves = nodesMap.has(score)
+                    ? `${nodesMap.get(score)},${i}` : i;
+                    nodesMap.set(score, moves);
                 }
+            });
+            if(depth === 0) { //Main call
+                if(typeof nodesMap.get(bestScore) === "string") {
+                    const arr = nodesMap.get(bestScore).split(",");
+                    const rnd = Math.floor(Math.random() * arr.length);
+                    return arr[rnd];
+                }
+                else {console.table(nodesMap);return nodesMap.get(bestScore);}
             }
-            return bestScore;
+            return bestScore; //Recursive call
         }
     }
 
-    function _easyAi() {
+    function _getBestMove() {
+        const move = _minimax(gameBoard, sign, opponentSign); //bot is always maximizing player
+        console.log(nodesMap);
+        return move;
+    }
+
+    function _getRandomMove() {
         const cellsInd = gameBoard.getFreeCellsInd();
-        console.log(cellsInd);
-        const rndIndex = cellsInd[Math.floor(Math.random() * cellsInd.length)];
+        return cellsInd[Math.floor(Math.random() * cellsInd.length)];
+
+    }
+
+    function _getMoveWithPrecision(precision) {
+        let rnd = Math.floor(Math.random() * 100 + 1);
+        console.log(rnd);
+        return rnd <= precision ? _getBestMove() : _getRandomMove();
+    }
+
+    function _easyAi() {
+        const rndIndex = _getRandomMove();
         displayController.displayBotPlayerSign(rndIndex, sign);
         return rndIndex;
     }
 
     function _normalAi() {
-        //TODO: to implement
-        throw Error;
+        let move = _getMoveWithPrecision(75);
+        displayController.displayBotPlayerSign(move, sign);
+        return move;
     }
 
     function _hardAi() {
-        let bestScore = -Infinity;
-        let bestMove = undefined;
-        for(let i = 0; i < 9; i++) {
-            if(gameBoard.getSign(i) === "") {
-                gameBoard.setSign(i, sign);
-                let score = _minimax(gameBoard, 0, sign, false);
-                gameBoard.setSign(i, "");
-                if(score > bestScore) {
-                    bestScore = score;
-                    bestMove = i;
-                }
-            }
-        }
+        let bestMove = _getBestMove();
         displayController.displayBotPlayerSign(bestMove, sign);
         return bestMove;
     }
@@ -331,14 +367,16 @@ const game = (() => {
     }
 
     /* Utility function to calculate the score used in @_minimax() */
-    const checkWinnerForType = (board, sign) => {
-        const res = _searchWinningCombination(board, sign)
-        if (res.length === 0) { //Search failed
-            return "";
+    const checkWinner = (board) => {
+        const resX = _searchWinningCombination(board, "x");
+        const resY = _searchWinningCombination(board, "o");
+        if (resX.length === 3) { //x won
+            return "x";
         }
-        else { //There is a winner
-            return board.getSign(res[0]) === player1.getSign() ? player1.getType() : player2.getType();
+        else if(resY.length === 3) { //o won
+            return "o";
         }
+        else {return "";} //nobody won
     }
 
     const playTurn = (index) => {
@@ -418,5 +456,5 @@ const game = (() => {
     const getWinningCombination = () => {return winningCombination}
 
     return {start, restart, shouldAddSign, playTurn, getCurrentPlayer, 
-        getWinningCombination, checkWinnerForType};
+        getWinningCombination, checkWinner};
 })();
